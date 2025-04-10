@@ -8,68 +8,62 @@ const AdminDashboard = () => {
   const [totalRevenue, setTotalRevenue] = useState(0);
   const [orderCounts, setOrderCounts] = useState({ Pending: 0, Shipped: 0, Delivered: 0 });
 
-  // Workshop State
   const [newWorkshop, setNewWorkshop] = useState({ title: "", location: "", date: "", description: "" });
   const [workshops, setWorkshops] = useState([]);
 
   useEffect(() => {
-    // Fetch products
-    const allProducts = getProducts();
-    setPendingCrafts(allProducts.filter((product) => !product.approved));
+    const storedPending = JSON.parse(localStorage.getItem("pendingProducts")) || [];
+    setPendingCrafts(storedPending);
 
-    // Fetch orders
     const orderData = getOrders();
     setOrders(orderData);
-
-    // Calculate total sales & revenue
     setTotalSales(orderData.length);
     setTotalRevenue(orderData.reduce((sum, order) => sum + order.totalPrice, 0));
 
-    // Calculate order counts by status
     const counts = { Pending: 0, Shipped: 0, Delivered: 0 };
     orderData.forEach(order => counts[order.status]++);
     setOrderCounts(counts);
 
-    // Load workshops from localStorage
     const savedWorkshops = JSON.parse(localStorage.getItem("workshops")) || [];
     setWorkshops(savedWorkshops);
   }, []);
 
-  // Approve a craft
   const approveCraft = (id) => {
-    const updatedProducts = getProducts().map((product) =>
-      product.id === id ? { ...product, approved: true } : product
-    );
+    const storedPending = JSON.parse(localStorage.getItem("pendingProducts")) || [];
+    const craftToApprove = storedPending.find((p) => p.id === id);
+    if (!craftToApprove) return;
+
+    // Remove from pending
+    const updatedPending = storedPending.filter((p) => p.id !== id);
+    localStorage.setItem("pendingProducts", JSON.stringify(updatedPending));
+    setPendingCrafts(updatedPending);
+
+    // Add to approved products
+    const currentProducts = getProducts();
+    const updatedProducts = [...currentProducts, { ...craftToApprove, approved: true }];
     localStorage.setItem("products", JSON.stringify(updatedProducts));
-    setPendingCrafts(updatedProducts.filter((product) => !product.approved));
+    alert("Craft approved and added to home page.");
   };
 
-  // Handle order status update
   const changeOrderStatus = (id, status) => {
     updateOrderStatus(id, status);
     const updatedOrders = getOrders();
     setOrders(updatedOrders);
 
-    // Update order count
     const newCounts = { Pending: 0, Shipped: 0, Delivered: 0 };
     updatedOrders.forEach(order => newCounts[order.status]++);
     setOrderCounts(newCounts);
   };
 
-  // Handle workshop form submit
   const handleWorkshopSubmit = (e) => {
     e.preventDefault();
-    const newWs = {
-      ...newWorkshop,
-      id: Date.now()
-    };
+    const newWs = { ...newWorkshop, id: Date.now() };
     const updatedWorkshops = [...workshops, newWs];
     localStorage.setItem("workshops", JSON.stringify(updatedWorkshops));
     setWorkshops(updatedWorkshops);
     setNewWorkshop({ title: "", location: "", date: "", description: "" });
   };
 
-  // Logout Function
   const handleLogout = () => {
     localStorage.removeItem("token");
     window.location.href = "/login";
@@ -77,10 +71,9 @@ const AdminDashboard = () => {
 
   return (
     <div className="max-w-6xl mx-auto mt-10 p-6 bg-white rounded-lg shadow-lg">
-      {/* Header */}
       <h2 className="text-3xl font-bold text-center mb-6 text-gray-800">Admin Dashboard</h2>
 
-      {/* Sales Analytics Section */}
+      {/* Analytics */}
       <div className="grid grid-cols-2 md:grid-cols-3 gap-6 mb-8">
         <div className="bg-blue-100 p-6 rounded-lg text-center">
           <h3 className="text-xl font-semibold">Total Sales</h3>
@@ -104,7 +97,7 @@ const AdminDashboard = () => {
         </div>
       </div>
 
-      {/* Pending Crafts Section */}
+      {/* Pending Crafts */}
       <div className="mb-8">
         <h3 className="text-2xl font-semibold mb-4 text-gray-700">Pending Crafts</h3>
         {pendingCrafts.length === 0 ? (
@@ -113,10 +106,15 @@ const AdminDashboard = () => {
           <div className="space-y-3">
             {pendingCrafts.map((craft) => (
               <div key={craft.id} className="flex justify-between items-center bg-gray-100 p-4 rounded-lg">
-                <div>
-                  <h3 className="text-lg font-semibold">{craft.name}</h3>
-                  <p className="text-gray-600">Category: {craft.category}</p>
-                  <p className="text-gray-600">₹{craft.price}</p>
+                <div className="flex items-center gap-4">
+                  {craft.image && (
+                    <img src={craft.image} alt={craft.name} className="w-16 h-16 object-cover rounded" />
+                  )}
+                  <div>
+                    <h3 className="text-lg font-semibold">{craft.name}</h3>
+                    <p className="text-gray-600">₹{craft.price}</p>
+                    <p className="text-sm text-gray-500">{craft.description}</p>
+                  </div>
                 </div>
                 <button
                   onClick={() => approveCraft(craft.id)}
@@ -130,7 +128,7 @@ const AdminDashboard = () => {
         )}
       </div>
 
-      {/* Orders Section */}
+      {/* Orders */}
       <div className="mb-8">
         <h3 className="text-2xl font-semibold mb-4 text-gray-700">Orders</h3>
         {orders.length === 0 ? (
@@ -157,7 +155,7 @@ const AdminDashboard = () => {
         )}
       </div>
 
-      {/* Workshops Section */}
+      {/* Workshops */}
       <div className="mb-8">
         <h3 className="text-2xl font-semibold mb-4 text-gray-700">Host a Workshop 🎨</h3>
         <form onSubmit={handleWorkshopSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
@@ -199,7 +197,6 @@ const AdminDashboard = () => {
           </button>
         </form>
 
-        {/* Display hosted workshops */}
         <h4 className="text-xl font-semibold mb-2 text-gray-700">Hosted Workshops 📋</h4>
         {workshops.length === 0 ? (
           <p className="text-gray-500">No workshops hosted yet.</p>
@@ -216,7 +213,7 @@ const AdminDashboard = () => {
         )}
       </div>
 
-      {/* Logout Button */}
+      {/* Logout */}
       <div className="text-center mt-6">
         <button
           onClick={handleLogout}

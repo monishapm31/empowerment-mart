@@ -2,10 +2,19 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
 import "./index.css";
+
+
+// Carousel styles
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
+
+// React Router
 import { BrowserRouter } from "react-router-dom";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
-  <BrowserRouter> {/* Ensure only one Router */}
-    <App />
-  </BrowserRouter>
+  <React.StrictMode>
+    <BrowserRouter> {/* ✅ Wrap here */}
+      <App />
+    </BrowserRouter>
+  </React.StrictMode>
 );

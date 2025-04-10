@@ -10,7 +10,7 @@ import Cart from "./pages/Cart";
 import { CartProvider } from "./context/CartContext";
 import { WishlistProvider } from "./context/WishlistContext";
 import Checkout from "./pages/Checkout";
-
+import UploadProduct from "./pages/UploadProduct";
 import OrderConfirmation from "./pages/OrderConfirmation"; 
 import Profile from "./pages/Profile"; 
 import Wishlist from "./pages/Wishlist";
@@ -30,9 +30,11 @@ function App() {
           <Route path="/cart" element={<Cart />} />
           <Route path="/wishlist" element={<Wishlist />} />
           <Route path="/checkout" element={<Checkout />} />
-          
-          <Route path="/order-confirmation" element={<OrderConfirmation />} />
+          <Route path="/upload-product" element={<UploadProduct />} />
+         <Route path="/order-confirmation" element={<OrderConfirmation />} />
           <Route path="/profile" element={<Profile />} />
+      
+
         </Routes>
       </WishlistProvider>
     </CartProvider>

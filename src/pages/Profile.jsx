@@ -14,9 +14,9 @@ const Profile = () => {
   // Fetch user data from localStorage
   const [user, setUser] = useState(
     JSON.parse(localStorage.getItem("user")) || {
-      name: "Monisha P M",
-      email: "pmmonisha22@gmail.com",
-      phone: "9019297362",
+      name: "Chandan Gowda B M",
+      email: "Chandan@gmail.com",
+      phone: "6363694474",
       address: "Mandya",
     }
   );

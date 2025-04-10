@@ -10,22 +10,34 @@ const Login = () => {
   const handleLogin = (e) => {
     e.preventDefault();
 
-    // Admin Check
+    // 🔐 Admin login (hardcoded)
     if (email === "admin@example.com" && password === "admin123") {
       localStorage.setItem("role", "admin");
       navigate("/admin");
       return;
     }
 
-    // Get registered users from localStorage
+    // 👥 Fetch users from localStorage
     const users = JSON.parse(localStorage.getItem("users")) || [];
 
-    // Check if user exists
-    const user = users.find((u) => u.email === email && u.password === password);
+    // 🔎 Find matching user
+    const user = users.find(
+      (u) => u.email === email && u.password === password
+    );
 
     if (user) {
-      localStorage.setItem("role", "user");
-      navigate("/home");
+      localStorage.setItem("role", user.role);
+      localStorage.setItem("email", user.email);
+      localStorage.setItem("phone", user.phone);
+
+      // 🌐 Redirect based on role
+      if (user.role === "user") {
+        navigate("/home");
+      } else if (user.role === "seller") {
+        navigate("/upload-product");
+      } else {
+        navigate("/");
+      }
     } else {
       setError("Invalid email or password. Please try again.");
     }
