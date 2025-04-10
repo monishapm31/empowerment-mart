@@ -10,8 +10,22 @@ const Login = () => {
   const handleLogin = (e) => {
     e.preventDefault();
 
+    const trimmedEmail = email.trim();
+    const trimmedPassword = password;
+
+    if (!trimmedEmail || !trimmedPassword) {
+      setError("Please enter both email and password.");
+      return;
+    }
+
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailPattern.test(trimmedEmail)) {
+      setError("Invalid email format.");
+      return;
+    }
+
     // 🔐 Admin login (hardcoded)
-    if (email === "admin@example.com" && password === "admin123") {
+    if (trimmedEmail === "admin@example.com" && trimmedPassword === "admin123") {
       localStorage.setItem("role", "admin");
       navigate("/admin");
       return;
@@ -20,9 +34,9 @@ const Login = () => {
     // 👥 Fetch users from localStorage
     const users = JSON.parse(localStorage.getItem("users")) || [];
 
-    // 🔎 Find matching user
+    // 🔍 Match user credentials
     const user = users.find(
-      (u) => u.email === email && u.password === password
+      (u) => u.email === trimmedEmail && u.password === trimmedPassword
     );
 
     if (user) {
@@ -30,13 +44,16 @@ const Login = () => {
       localStorage.setItem("email", user.email);
       localStorage.setItem("phone", user.phone);
 
-      // 🌐 Redirect based on role
-      if (user.role === "user") {
-        navigate("/home");
-      } else if (user.role === "seller") {
-        navigate("/upload-product");
-      } else {
-        navigate("/");
+      // 🔁 Redirect based on role
+      switch (user.role) {
+        case "user":
+          navigate("/home");
+          break;
+        case "seller":
+          navigate("/upload-product");
+          break;
+        default:
+          navigate("/");
       }
     } else {
       setError("Invalid email or password. Please try again.");
@@ -66,7 +83,10 @@ const Login = () => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
-          <button className="w-full bg-teal-600 text-white p-3 rounded-lg hover:bg-teal-700 transition">
+          <button
+            type="submit"
+            className="w-full bg-teal-600 text-white p-3 rounded-lg hover:bg-teal-700 transition"
+          >
             Login
           </button>
         </form>

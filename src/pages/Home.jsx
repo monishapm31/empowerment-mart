@@ -15,7 +15,7 @@ const Home = () => {
   };
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/approved-products")
+    fetch("http://localhost:5173/api/approved-products")
       .then((res) => res.json())
       .then((data) => setApprovedProducts(data))
       .catch((err) => console.error("Error fetching approved products:", err));

@@ -3,19 +3,33 @@ import { useNavigate } from "react-router-dom";
 
 const Signup = () => {
   const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState(""); // 📱
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState(""); // 🔒
-  const [role, setRole] = useState(""); // 👤
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [role, setRole] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
   const handleSignup = (e) => {
     e.preventDefault();
 
-    // Validation checks
-    if (!email || !phone || !password || !confirmPassword || !role) {
+    // Trim and sanitize input
+    const trimmedEmail = email.trim();
+    const trimmedPhone = phone.trim();
+
+    if (!trimmedEmail || !trimmedPhone || !password || !confirmPassword || !role) {
       setError("All fields are required.");
+      return;
+    }
+
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailPattern.test(trimmedEmail)) {
+      setError("Invalid email format.");
+      return;
+    }
+
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters long.");
       return;
     }
 
@@ -25,16 +39,16 @@ const Signup = () => {
     }
 
     const users = JSON.parse(localStorage.getItem("users")) || [];
+    const userExists = users.find((u) => u.email === trimmedEmail);
 
-    const userExists = users.find((u) => u.email === email);
     if (userExists) {
       setError("User already exists with this email.");
       return;
     }
 
     const newUser = {
-      email,
-      phone,
+      email: trimmedEmail,
+      phone: trimmedPhone,
       password,
       role,
     };
@@ -92,7 +106,10 @@ const Signup = () => {
             <option value="user">User</option>
             <option value="seller">Seller</option>
           </select>
-          <button className="w-full bg-teal-600 text-white p-3 rounded-lg hover:bg-teal-700 transition">
+          <button
+            type="submit"
+            className="w-full bg-teal-600 text-white p-3 rounded-lg hover:bg-teal-700 transition"
+          >
             Signup
           </button>
         </form>
